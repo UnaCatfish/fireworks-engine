@@ -68,8 +68,6 @@ function background(color) {
 
 function backgroundGradient(colorStart, colorEnd) {
   const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
-  // gradient.addColorStop(0, '#171e26');
-  // gradient.addColorStop(1, '#3f586b');
   gradient.addColorStop(0, colorStart);
   gradient.addColorStop(1, colorEnd);
   ctx.fillStyle = gradient;

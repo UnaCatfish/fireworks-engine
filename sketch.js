@@ -1,44 +1,64 @@
-let stars, ground, hills, fireworks;
-let frames = 10000;
-let spawn = 75;
+"using strict"
+
+// Constants and colours
+// I'm from the UK, so I use colour with a 'u' in descriptions,  
+// but not invariable names, mainly because I'm being lazy.
 const gravity = new Vector(0, 0.2);
+const colorStar = 'silver';
+const colorHillB = '#080808'
+const colorHillF = '#0f0f0f'
+const colorGround = '#050505'
+const colorSkyStart = '#150505'
+const colorSkyEnd = '#101022'
 
+// Lets make some variables to hold the assets and other stuff
+let stars, ground, hills, fireworks
+let frames = 1000;
+
+// The setup runs once and initialises all the assets
 function setup() {
-	createCanvas(400, 400);
-	stars = new Stars(60, 1, 2, 'silver', 8);
-	hillsB = new Hills(3, 220, '#080808');
-	hillsF = new Hills(2, 120, '#0f0f0f');
-	ground = new Ground(20, '#050505');
-	fireworks = new Fireworks(canvas.width / 2, canvas.height - ground.height);
-
+	createCanvas(500, 500);
+	stars = new Stars(60, 1, 2, colorStar, 8);
+	hillsB = new Hills(3, 220, colorHillB);
+	hillsF = new Hills(2, 120, colorHillF);
+	ground = new Ground(20, colorGround);
+	fireworks = new Fireworks(canvas.width / 2, ground.floor);
+	fireworksLeft = new Fireworks(canvas.width / 5, ground.floor);
+	fireworksRight = new Fireworks(canvas.width / 5 * 4, ground.floor);
 }
 
+// The animation loop that runs over and over and over
+// It can be stopped by using noLoop()
 function animate() {
-	backgroundGradient('#150505', '#101022');
+	backgroundGradient(colorSkyStart, colorSkyEnd);
 	stars.draw();
 	hillsB.draw();
 	hillsF.draw();
 	fireworks.draw();
+	fireworksLeft.draw();
+	fireworksRight.draw();
 	ground.draw();
 
-	if (spawn <= 0) {
-		spawn = randomIntFromRange(20, 300);
-		fireworks.newRocket();
-	}
-	spawn -= 1;
-
-	if (--frames <= 0) {
-		noLoop();
-	}
+	// Option to stop animation after a number of frames.
+	// Its only  there to stop the fan on my laptop from starting, even 
+	// though its not very loud or particularly distracting. 
+	// frames should be set as a number in variable above.
+	frames < 0 ? noLoop() : frames--;
 }
 
+//////////////////////////////////////////////////////////
+// These are the assets that  make up the pretty picture
+
+// Fireworks hold the rockets and 'cool' explosions
+// in this phrase, 'cool' stands for circles of, of, light!
 class Fireworks {
 	constructor(x, y) {
-		this.rockets = [];
-		this.explosions = [];
 		this.x = x;
 		this.y = y;
-		this.newRocket();
+		this.rockets = [];
+		this.explosions = [];
+		this.spawn = this.spawnRate();
+		this.spawnRocket();
 	}
 
 	draw() {
@@ -47,18 +67,18 @@ class Fireworks {
 			if (rocket.live <= 0) {
 				this.newExplosion(rocket.position)
 				this.rockets.splice(index, 1);
-				// console.log('boom');
 			}
 		});
 
 		for (let i = this.explosions.length - 1; i >= 0; i--) {
 			if (this.explosions[i].opacity > 0) {
 				this.explosions[i].draw();
-				this.explosions[i].opacity -= 0.005;
+				this.explosions[i].opacity -= 0.01;
 			} else {
 				this.explosions.splice(0, 1);
 			}
 		}
+		this.spawnRocket();
 	};
 
 	newRocket() {
@@ -68,8 +88,22 @@ class Fireworks {
 	newExplosion(position) {
 		this.explosions.push(new Explosion(position.x, position.y));
 	}
+
+	spawnRate() {
+		return randomIntFromRange(100, 300);
+	};
+
+	spawnRocket() {
+		if (this.spawn < 0) {
+			this.spawn = this.spawnRate();
+			this.newRocket();
+		}
+		this.spawn -= 1
+	}
+
 }
 
+// A singular explosion used by  fireworks
 class Explosion {
 	constructor(x, y) {
 		this.position = new Vector(x, y);
@@ -93,11 +127,12 @@ class Explosion {
 	}
 }
 
+// A singular rocket used by  fireworks
 class Rocket {
 	constructor(x, y) {
 		this.position = new Vector(x, y);
 		let speed = Math.random() * 4 + 8;
-		this.velocity = new Vector(Math.random() * 3 - 1.5, -speed);
+		this.velocity = new Vector(Math.random() * 2 - 1, -speed);
 		this.live = randomIntFromRange(50, 65);
 	}
 
@@ -110,7 +145,7 @@ class Rocket {
 	}
 }
 
-
+// The twinkle twinkle little stars
 class Stars {
 	constructor(qty, min, max, color, blur) {
 		this.starArray = [];
@@ -139,21 +174,23 @@ class Stars {
 	}
 }
 
+// The hills, alive with the sound of no music
+// Though I may change that at  some point
 class Hills {
 	constructor(number, height, color) {
 		this.number = number;
 		this.height = height;
 		this.color = color;
+		this.width = canvas.width / this.number;
 	}
 
 	draw() {
 		ctx.fillStyle = this.color;
-		let hillWidth = canvas.width / this.number;
 		for (let i = 1; i < this.number + 1; i++) {
 			ctx.beginPath();
-			ctx.moveTo(i * hillWidth - (hillWidth * 2), canvas.height);
-			ctx.lineTo(i * hillWidth - (hillWidth / 2), canvas.height - this.height);
-			ctx.lineTo(i * hillWidth + hillWidth, canvas.height);
+			ctx.moveTo(i * this.width - (this.width * 2), canvas.height);
+			ctx.lineTo(i * this.width - (this.width / 2), canvas.height - this.height);
+			ctx.lineTo(i * this.width + this.width, canvas.height);
 			ctx.closePath();
 			ctx.fill();
 		}
@@ -161,14 +198,16 @@ class Hills {
 	}
 }
 
+// Its the ground, what more can I say!
 class Ground {
 	constructor(height, color) {
 		this.height = height;
 		this.color = color;
+		this.floor = canvas.height - this.height;
 	}
 
 	draw() {
 		fill(this.color);
-		rect(0, canvas.height - this.height, canvas.width, this.height);
+		rect(0, this.floor, canvas.width, this.height);
 	}
 }
