@@ -12,7 +12,7 @@ Creates a small canvas on a webpage and draws some stars (that twinkle), mountai
 * [ ] Add acceleration into rockets
 * [ ] Add fuel to power rocket lifespan
 
-* [ ] Make explosions look like explosions
+* [X] Make explosions look like explosions
 * [ ] Have multiple explosion styles
 
 * [ ] Option to synchronise fireworks
