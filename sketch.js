@@ -43,5 +43,5 @@ function animate() {
 	// Its only  there to stop the fan on my laptop from starting, even 
 	// though its not very loud or particularly distracting. 
 	// frames should be set as a number in variable above.
-	frames < 0 ? noLoop() : frames--;
+	// frames < 0 ? noLoop() : frames--;
 }

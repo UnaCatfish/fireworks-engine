@@ -22,7 +22,7 @@ class Fireworks {
     for (let i = this.explosions.length - 1; i >= 0; i--) {
       if (this.explosions[i].opacity > 0) {
         this.explosions[i].draw();
-        this.explosions[i].opacity -= 0.01;
+        this.explosions[i].opacity -= 0.013;
       } else {
         this.explosions.splice(0, 1);
       }
